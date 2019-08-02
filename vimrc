@@ -1,12 +1,8 @@
 "==========================================
 " ProjectLink: https://github.com/wklken/vim-for-server
-" Author:  wklken
+" Author: wenqi 
 " Version: 0.2
-" Email: wklken@yeah.net
-" BlogPost: http://www.wklken.me
-" Donation: http://www.wklken.me/pages/donation.html
-" ReadMe: README.md
-" Last_modify: 2015-07-07
+" Last_modify: 2019-08-01
 " Desc: simple vim config for server, without any plugins.
 "==========================================
 
@@ -18,7 +14,7 @@ let g:mapleader = ','
 syntax on
 
 " history : how many lines of history VIM has to remember
-set history=2000
+set history=200
 
 " filetype
 filetype on
@@ -132,7 +128,8 @@ endif
 
 " theme
 set background=dark
-colorscheme desert
+"colorscheme desert
+colorscheme onedark
 
 " set mark column color
 hi! link SignColumn   LineNr
@@ -254,3 +251,131 @@ cnoremap <C-j> <t_kd>
 cnoremap <C-k> <t_ku>
 cnoremap <C-a> <Home>
 cnoremap <C-e> <End>
+
+" 相对行号: 行号变成相对，可以用 nj/nk 进行跳转
+set relativenumber number
+
+au FocusLost * :set norelativenumber number
+
+au FocusGained * :set relativenumber
+
+" 插入模式下用绝对行号, 普通模式下用相对
+"
+autocmd InsertEnter * :set norelativenumber number
+autocmd InsertLeave * :set relativenumber
+
+function! NumberToggle()
+  if(&relativenumber == 1)
+    set norelativenumber number
+  else
+    set relativenumber
+  endif
+endfunc
+
+nnoremap <C-n> :call NumberToggle()<cr>
+
+" 复制选中区到系统剪切板中
+vnoremap <leader>y "+y
+
+" select all
+map <Leader>sa ggVG
+
+" Quickly close the current window
+nnoremap <leader>q :q<CR>
+
+" Quickly save the current file
+nnoremap <leader>w :w<CR>
+
+" 交换 ' `, 使得可以快速使用'跳到marked位置
+nnoremap ' `
+nnoremap ` '
+let g:python3_host_prog='/usr/bin/python3'
+" Plug Install
+call plug#begin('~/.vim/bundle')
+Plug 'junegunn/vim-easy-align'
+Plug 'vim-airline/vim-airline'
+Plug 'kien/rainbow_parentheses.vim'
+Plug 'vim-airline/vim-airline-themes'
+
+" text object
+" 支持自定义文本对象
+Plug 'kana/vim-textobj-user'
+" 增加行文本对象: l   dal yal cil
+Plug 'kana/vim-textobj-line'
+" 增加文件文本对象: e   dae yae cie
+Plug 'kana/vim-textobj-entire'
+" 增加缩进文本对象: i   dai yai cii - 相同缩进属于同一块
+Plug 'kana/vim-textobj-indent'
+
+Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
+Plug 'scrooloose/nerdtree' | Plug 'jistr/vim-nerdtree-tabs'
+Plug 'majutsushi/tagbar'
+Plug 'zxqfl/tabnine-vim'
+call plug#end()
+
+"autocmd vimenter * NERDTree
+let NERDTreeHighlightCursorline=1
+let NERDTreeIgnore=[ '\.pyc$', '\.pyo$', '\.obj$', '\.o$', '\.so$', '\.egg$', '^\.git$', '^\.svn$', '^\.hg$', '^\.suo$', '^\.sln$', '^\.vcxproj$' ]
+autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") && b:NERDTreeType == "primary") | q | end
+let g:nerdtree_tabs_open_on_console_startup=0
+let g:nerdtree_tabs_open_on_gui_startup=0
+map <Leader>n <plug>NERDTreeTabsToggle<CR>
+nmap <F9> :TagbarToggle<CR>
+let g:tagbar_autofocus = 1
+" let g:tagbar_autoshowtag = 1
+" let g:tagbar_show_visibility = 1
+"
+" for c++
+let g:tagbar_type_cpp = {
+\ 'kinds' : [
+     \ 'c:classes:0:1',
+     \ 'd:macros:0:1',
+     \ 'e:enumerators:0:0', 
+     \ 'f:functions:0:1',
+     \ 'g:enumeration:0:1',
+     \ 'l:local:0:1',
+     \ 'm:members:0:1',
+     \ 'n:namespaces:0:1',
+     \ 'p:functions_prototypes:0:1',
+     \ 's:structs:0:1',
+     \ 't:typedefs:0:1',
+     \ 'u:unions:0:1',
+     \ 'v:global:0:1',
+     \ 'x:external:0:1'
+ \ ],
+ \ 'sro'        : '::',
+ \ 'kind2scope' : {
+     \ 'g' : 'enum',
+     \ 'n' : 'namespace',
+     \ 'c' : 'class',
+     \ 's' : 'struct',
+     \ 'u' : 'union'
+ \ },
+ \ 'scope2kind' : {
+     \ 'enum'      : 'g',
+     \ 'namespace' : 'n',
+     \ 'class'     : 'c',
+     \ 'struct'    : 's',
+     \ 'union'     : 'u'
+ \ }
+\ }
+" for ruby
+"
+" ultisnips {{{
+    let g:UltiSnipsExpandTrigger       = "<tab>"
+    let g:UltiSnipsJumpForwardTrigger  = "<tab>"
+    let g:UltiSnipsJumpBackwardTrigger = "<s-tab>"
+    let g:UltiSnipsSnippetDirectories  = ['UltiSnips']
+    let g:UltiSnipsSnippetsDir = '~/.vim/UltiSnips'
+    " 定义存放代码片段的文件夹 .vim/UltiSnips下，使用自定义和默认的，将会的到全局，有冲突的会提示
+    " 进入对应filetype的snippets进行编辑
+    map <leader>us :UltiSnipsEdit<CR>
+
+    " ctrl+j/k 进行选择
+    augroup EditVim
+    autocmd!
+    au BufEnter,BufRead * exec "inoremap <silent> " . g:UltiSnipsJumpBackwordTrigger . " <C-R>=g:KInYCM()<cr>"
+    augroup END
+
+    let g:UltiSnipsJumpBackwordTrigger = "<c-k>"
+
